@@ -1,12 +1,70 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Python script to fetch/scrape data from infosnow.ch to see what lifts are open at Gstaad at present.
+Can be run in Summer or Winter mode (defaults to time of year).
+"""
+
+__version__ = "0.0.2"
+__author__ = "Lawrence Adams"
+
+import argparse
+import datetime
 import urllib.request
 from bs4 import BeautifulSoup
 
 # Gstaad status API end point
-STATUS_API_URL = "https://www.infosnow.ch/~apgmontagne/?lang=en&id=39&tab=web-su"
+STATUS_API_URL_WINTER = "https://www.infosnow.ch/~apgmontagne/?lang=en&id=39&tab=web-wi"
+STATUS_API_URL_SUMMER = "http://www.infosnow.ch/~apgmontagne/?lang=en&pid=39&tab=web-su"
 
 OPEN_STRING =        "    OPEN    ✅"
 PREPERATION_STRING = "PREPERATION ⏳"
 CLOSED_STRING =      "   CLOSED   ⛔️"
+
+
+def init_argparse() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        usage="%(prog)s [OPTION]",
+        description="Print Gstaad Ski Lift status at present. Defaults to mode appropriate for time of year."
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-w", "--winter", action="store_true",
+        help="Use summer mode"
+    )
+    group.add_argument(
+        "-s", "--summer", action="store_true",
+        help="Use winter mode"
+    )
+    parser.add_argument(
+        "-v", "--version", action="version",
+        version=f"{parser.prog} version {__version__}"
+    )
+    return parser
+
+def main() -> str:
+    """
+    Parse command line arguments. If none given, detect month and use appropriate mode.
+    :return URL string for winter/summer mode
+    """
+    parser = init_argparse()
+    args = parser.parse_args()
+
+    if args.winter:
+        return STATUS_API_URL_WINTER
+    elif args.summer:
+        return  STATUS_API_URL_SUMMER
+    else:
+        dt = datetime.date.today().month
+        if dt == 12 | dt < 5:
+            print("[Auto] Winter 🌨")
+            return STATUS_API_URL_WINTER
+        else:
+            print("[Auto] Summer 🌞")
+            return STATUS_API_URL_SUMMER
+        
+STATUS_API_URL = main()
 
 # Try to open status URL, and handle any errors
 print("Contacting server...", end='', flush=True)
@@ -27,9 +85,8 @@ lifts_block = soup.find_all("td", {"class": "cell3"})
 
 lift_dict = {}
 
-divs = soup.find_all("div", {"class": "content"})[1:3]
+divs = soup.find_all("div", {"class": "content"})
 
-# for div in divs:
 def get_lift_data(input_divs, output_dict):
     for td in input_divs.find_all("td", {"class": "cell3"}):
         for tr in td.find_all("tr"):
