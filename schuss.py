@@ -6,7 +6,7 @@ Python script to fetch/scrape data from infosnow.ch to see what lifts are open a
 Can be run in Summer or Winter mode (defaults to time of year).
 """
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __author__ = "Lawrence Adams"
 
 import argparse
@@ -85,6 +85,12 @@ except urllib.request.URLError as e:
 soup = BeautifulSoup(o, "html.parser")
 
 lifts_block = soup.find_all("td", {"class": "cell3"})
+
+# Check len is sufficient; else raise error
+if len(lifts_block) == 0:
+    print("Unable to scrape site: no values returned. Site setup may have changed.\n Please contact maintainer.")
+    raise RuntimeError("[Error] Scraped content length == 0")
+
 
 lift_dict = {}
 
