@@ -29,21 +29,27 @@ lift_dict = {}
 
 divs = soup.find_all("div", {"class": "content"})[1:3]
 
-for div in divs:
-    for td in div.find_all("td", {"class": "cell3"}):
+# for div in divs:
+def get_lift_data(input_divs, output_dict):
+    for td in input_divs.find_all("td", {"class": "cell3"}):
         for tr in td.find_all("tr"):
             lift_name = str(tr.find("td", {"class": "txtBox3"}).encode_contents(), 'utf-8').strip()
 
             lifts_status = tr.find_all("img")
             for lift in lifts_status:
                 if lift['src'] == "//www.infosnow.ch/~apgmontagne/data/status/8/1.gif":
-                    lift_dict[lift_name] = OPEN_STRING
+                    output_dict[lift_name] = OPEN_STRING
                 elif lift['src'] == "//www.infosnow.ch/~apgmontagne/data/status/8/2.gif":
-                    lift_dict[lift_name] = PREPERATION_STRING
+                    output_dict[lift_name] = PREPERATION_STRING
                 elif lift['src'] == "//www.infosnow.ch/~apgmontagne/data/status/8/3.gif":
-                    lift_dict[lift_name] = CLOSED_STRING
+                    output_dict[lift_name] = CLOSED_STRING
                 else:
                     pass # Ignore lift icons at present
+    return output_dict
+
+for div in divs:
+    get_lift_data(div, lift_dict)
+
 
 print("======= LIFTS =======")
 for lift in lift_dict:
