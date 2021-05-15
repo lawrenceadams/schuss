@@ -6,11 +6,12 @@ Python script to fetch/scrape data from infosnow.ch to see what lifts are open a
 Can be run in Summer or Winter mode (defaults to time of year).
 """
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __author__ = "Lawrence Adams"
 
 import argparse
 import datetime
+import sys
 import urllib.request
 from bs4 import BeautifulSoup
 
@@ -75,8 +76,10 @@ try:
 
 # Catch URL errors (e.g. service down/disconnected)
 except urllib.request.URLError as e:
-    print("Failed to connect to status server.")
+    print(" Error!")
+    print("Failed to connect to status server. Check internet connection.")
     print(e.reason)
+    sys.exit(1) # Exit in error state
 
 # Get status of services
 soup = BeautifulSoup(o, "html.parser")
