@@ -58,7 +58,7 @@ def main() -> str:
         return  STATUS_API_URL_SUMMER
     else:
         dt = datetime.date.today().month
-        if dt == 12 | dt < 5:
+        if dt == 12 or dt < 5:
             print("[Auto] Winter 🌨")
             return STATUS_API_URL_WINTER
         else:
